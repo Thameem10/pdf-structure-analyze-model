@@ -1,0 +1,33 @@
+# App _pycahe_
+
+/app/__pycache__
+
+/app/extractor/__pycache__
+
+/app/features/__pycache__
+
+/app/extractor/__pycache__
+
+# Data __pycache__
+
+/data/__pycache__
+
+# Dataset 
+
+/data/interim
+
+/data/labelled
+
+/data/output
+
+/data/processed
+
+/data/raw
+
+# venv
+
+/venv
+
+
+
+
