@@ -49,6 +49,7 @@ class ImageExtractor:
 
                 image_elements.append({
                     "type": "Image",
+                    "content": image_filename,
                     "page_number": page_number + 1,
                     "image_path": image_path,
                     "bbox": [x0, y0, x1, y1],

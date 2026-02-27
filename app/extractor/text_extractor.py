@@ -62,7 +62,7 @@ class TextExtractor:
                     text_elements.append({
                         "type": "Text",
                         "page_number": page_number + 1,
-                        "text": line_text,
+                        "content": line_text,
 
                         # Typography
                         "font_size": max_font_size,

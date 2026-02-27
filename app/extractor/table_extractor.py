@@ -12,29 +12,53 @@ class TableExtractor:
         self.output_folder = output_folder
         os.makedirs(self.output_folder, exist_ok=True)
 
+    def is_empty_table(self, table):
+        """
+        Check if table is empty or meaningless.
+        """
+
+        # No rows or columns
+        if table.shape[0] == 0 or table.shape[1] == 0:
+            return True
+
+        df = table.df
+
+        # All cells empty or whitespace
+        if df.applymap(lambda x: str(x).strip() == "").all().all():
+            return True
+
+        # Very tiny tables (optional filter)
+        x0, y0, x1, y1 = table._bbox
+        width = x1 - x0
+        height = y1 - y0
+        area = width * height
+
+        if area < 1000:  # adjust threshold if needed
+            return True
+
+        return False
+
     def extract(self):
-        """
-        Extract tables with bounding boxes and metadata.
-        Returns structured table layout elements.
-        """
 
         table_elements = []
 
-        # Extract tables from all pages
         tables = camelot.read_pdf(
             self.pdf_path,
             pages="all",
-            flavor="stream"  # use "lattice" if tables have borders
+            flavor="lattice"
         )
 
         for idx, table in enumerate(tables):
 
-            # Save table as CSV (optional but useful)
+            # Skip empty tables
+            if self.is_empty_table(table):
+                continue
+
+            # Save valid table
             table_filename = f"table_{idx+1}.csv"
             table_path = os.path.join(self.output_folder, table_filename)
             table.df.to_csv(table_path, index=False)
 
-            # Extract bounding box
             x0, y0, x1, y1 = table._bbox
 
             width = x1 - x0
@@ -45,6 +69,7 @@ class TableExtractor:
 
             table_elements.append({
                 "type": "Table",
+                "content": table_filename,
                 "page_number": int(page_number),
                 "table_path": table_path,
                 "bbox": [x0, y0, x1, y1],
@@ -54,7 +79,7 @@ class TableExtractor:
                 "aspect_ratio": width / height if height != 0 else 0,
                 "rows": table.shape[0],
                 "columns": table.shape[1],
-                "y_position": float(y0)  # for layout sorting
+                "y_position": float(y0)
             })
 
         return table_elements

@@ -98,16 +98,13 @@ for i, row in enumerate(st.session_state.data):
 
     # Handle text safely
     if row["type"] == "Text":
-        st.write(row.get("text", ""))
+        st.write(row.get("content", ""))
 
     elif row["type"] == "Image":
-        st.info(f"🖼 Image | Area: {row.get('image_area', 0)}")
+        st.write(row.get("content", ""))
 
     elif row["type"] == "Table":
-        st.info(
-            f"📊 Table | Rows: {row.get('table_rows', 0)} "
-            f"| Columns: {row.get('table_columns', 0)}"
-        )
+        st.write(row.get("content", ""))
 
     current_label = row.get("label", "Paragraph")
 

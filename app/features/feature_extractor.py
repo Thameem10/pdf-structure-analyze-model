@@ -39,14 +39,14 @@ class FeatureExtractor:
             # --------------------------------------------------
             if element_type == "Text":
 
-                line_text = element.get("text", "")
+                line_text = element.get("content", "")
                 max_font_size = element.get("font_size", 0)
                 bold_flag = element.get("is_bold", 0)
 
                 feature_row = {
                     "type": "Text",
                     "page_number": element.get("page_number"),
-
+                    "content": line_text,
                     # --- Typography ---
                     "font_size": max_font_size,
                     "font_size_relative": max_font_size / avg_font_size if avg_font_size else 0,
@@ -79,6 +79,7 @@ class FeatureExtractor:
                 feature_row = {
                     "type": "Image",
                     "page_number": element.get("page_number"),
+                    "content": element.get("content"),
 
                     # --- No typography ---
                     "font_size": 0,
@@ -115,6 +116,7 @@ class FeatureExtractor:
                 feature_row = {
                     "type": "Table",
                     "page_number": element.get("page_number"),
+                    "content": element.get("content"),
 
                     # --- No typography ---
                     "font_size": 0,
