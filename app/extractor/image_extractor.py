@@ -2,7 +2,8 @@ import os
 
 class ImageExtractor:
     """
-    Extracts and saves images from PDF.
+    Extracts images from PDF and returns structured layout elements
+    including bounding boxes and metadata.
     """
 
     def __init__(self, document, output_folder="data/output/images"):
@@ -12,36 +13,50 @@ class ImageExtractor:
 
     def extract(self):
         """
-        Extract images page-wise.
+        Extract images page-wise with bounding box and metadata.
+        Returns structured image layout elements.
         """
 
-        image_results = []
+        image_elements = []
 
         for page_number, page in enumerate(self.document):
             image_list = page.get_images(full=True)
 
-            page_images = []
-
             for img_index, img in enumerate(image_list):
+
                 xref = img[0]
+
+                # Extract image bytes
                 base_image = self.document.extract_image(xref)
                 image_bytes = base_image["image"]
                 image_ext = base_image["ext"]
 
-                image_filename = (
-                    f"page{page_number+1}_img{img_index+1}.{image_ext}"
-                )
-
+                image_filename = f"page{page_number+1}_img{img_index+1}.{image_ext}"
                 image_path = os.path.join(self.output_folder, image_filename)
 
+                # Save image
                 with open(image_path, "wb") as f:
                     f.write(image_bytes)
 
-                page_images.append(image_path)
+                # Get image bounding box on page
+                bbox = page.get_image_bbox(img)
 
-            image_results.append({
-                "page_number": page_number + 1,
-                "images": page_images
-            })
+                x0, y0, x1, y1 = bbox
 
-        return image_results
+                width = x1 - x0
+                height = y1 - y0
+                area = width * height
+
+                image_elements.append({
+                    "type": "Image",
+                    "page_number": page_number + 1,
+                    "image_path": image_path,
+                    "bbox": [x0, y0, x1, y1],
+                    "width": width,
+                    "height": height,
+                    "area": area,
+                    "aspect_ratio": width / height if height != 0 else 0,
+                    "y_position": y0  # useful for sorting layout order
+                })
+
+        return image_elements

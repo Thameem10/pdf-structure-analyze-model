@@ -1,5 +1,4 @@
 from typing import List, Dict
-from statistics import mean
 
 from app.features.feature_utils import (
     is_bold,
@@ -11,74 +10,136 @@ from app.features.feature_utils import (
 
 class FeatureExtractor:
     """
-    Converts structured PDF text into line-level features
-    suitable for ML classification.
+    Extracts features from multi-type layout elements:
+    Text, Image, Table
     """
 
-    def __init__(self, structured_pages: List[Dict]):
-        self.structured_pages = structured_pages
+    def __init__(self, layout_elements: List[Dict]):
+        self.layout_elements = layout_elements
 
     def extract(self) -> List[Dict]:
-        """
-        Extract line-level features for entire document.
-        """
 
         all_features = []
 
-        for page in self.structured_pages:
-            page_number = page["page_number"]
+        # --- Compute average font size for entire document (Text only) ---
+        font_sizes = [
+            el.get("font_size")
+            for el in self.layout_elements
+            if el.get("type") == "Text" and el.get("font_size") is not None
+        ]
 
-            # Collect all font sizes in page to compute average
-            page_font_sizes = []
+        avg_font_size = sum(font_sizes) / len(font_sizes) if font_sizes else 1
 
-            for block in page["blocks"]:
-                for line in block["lines"]:
-                    for span in line:
-                        page_font_sizes.append(span["size"])
+        for element in self.layout_elements:
 
-            if not page_font_sizes:
-                continue
+            element_type = element.get("type")
 
-            avg_font_size = mean(page_font_sizes)
+            # --------------------------------------------------
+            # TEXT FEATURES
+            # --------------------------------------------------
+            if element_type == "Text":
 
-            for block in page["blocks"]:
-                block_bbox = block["bbox"]
+                line_text = element.get("text", "")
+                max_font_size = element.get("font_size", 0)
+                bold_flag = element.get("is_bold", 0)
 
-                for line in block["lines"]:
-                    line_text = " ".join(span["text"] for span in line).strip()
+                feature_row = {
+                    "type": "Text",
+                    "page_number": element.get("page_number"),
 
-                    if not line_text:
-                        continue
+                    # --- Typography ---
+                    "font_size": max_font_size,
+                    "font_size_relative": max_font_size / avg_font_size if avg_font_size else 0,
+                    "is_bold": bold_flag,
 
-                    max_font_size = max(span["size"] for span in line)
-                    bold_flag = max(is_bold(span["font"]) for span in line)
+                    # --- Text ---
+                    "uppercase_ratio": uppercase_ratio(line_text),
+                    "text_length": text_length(line_text),
+                    "contains_numbering": contains_numbering(line_text),
 
-                    # Use first span bbox for y-position
-                    x0, y0, x1, y1 = line[0]["bbox"]
+                    # --- Layout ---
+                    "y_position": element.get("y_position", 0),
+                    "block_width": element.get("block_width", 0),
 
-                    feature_row = {
-                        "page_number": page_number,
-                        "text": line_text,
+                    # --- Image/Table placeholders ---
+                    "image_area": 0,
+                    "table_rows": 0,
+                    "table_columns": 0,
 
-                        # --- Typography Features ---
-                        "font_size": max_font_size,
-                        "font_size_relative": max_font_size / avg_font_size,
-                        "is_bold": bold_flag,
+                    "label": None
+                }
 
-                        # --- Text Features ---
-                        "uppercase_ratio": uppercase_ratio(line_text),
-                        "text_length": text_length(line_text),
-                        "contains_numbering": contains_numbering(line_text),
+                all_features.append(feature_row)
 
-                        # --- Layout Features ---
-                        "y_position": y0,
-                        "block_x0": block_bbox[0],
-                        "block_width": block_bbox[2] - block_bbox[0],
+            # --------------------------------------------------
+            # IMAGE FEATURES
+            # --------------------------------------------------
+            elif element_type == "Image":
 
-                        # Placeholder for supervised learning
-                        "label": None
-                    }
+                feature_row = {
+                    "type": "Image",
+                    "page_number": element.get("page_number"),
 
-                    all_features.append(feature_row)
+                    # --- No typography ---
+                    "font_size": 0,
+                    "font_size_relative": 0,
+                    "is_bold": 0,
+
+                    # --- No text ---
+                    "uppercase_ratio": 0,
+                    "text_length": 0,
+                    "contains_numbering": 0,
+
+                    # --- Layout ---
+                    "y_position": element.get("y_position", 0),
+                    "block_width": element.get("width", 0),
+
+                    # --- Image features ---
+                    "image_area": element.get("area", 0),
+                    "image_aspect_ratio": element.get("aspect_ratio", 0),
+
+                    # --- Table placeholders ---
+                    "table_rows": 0,
+                    "table_columns": 0,
+
+                    "label": None
+                }
+
+                all_features.append(feature_row)
+
+            # --------------------------------------------------
+            # TABLE FEATURES
+            # --------------------------------------------------
+            elif element_type == "Table":
+
+                feature_row = {
+                    "type": "Table",
+                    "page_number": element.get("page_number"),
+
+                    # --- No typography ---
+                    "font_size": 0,
+                    "font_size_relative": 0,
+                    "is_bold": 0,
+
+                    # --- No text ---
+                    "uppercase_ratio": 0,
+                    "text_length": 0,
+                    "contains_numbering": 0,
+
+                    # --- Layout ---
+                    "y_position": element.get("y_position", 0),
+                    "block_width": element.get("width", 0),
+
+                    # --- Image placeholder ---
+                    "image_area": 0,
+
+                    # --- Table features ---
+                    "table_rows": element.get("rows", 0),
+                    "table_columns": element.get("columns", 0),
+
+                    "label": None
+                }
+
+                all_features.append(feature_row)
 
         return all_features
