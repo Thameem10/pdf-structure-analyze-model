@@ -13,6 +13,7 @@ from sklearn.metrics import (
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import MinMaxScaler
 from utils import load_data, split_data
 
 
@@ -32,6 +33,17 @@ X_train, X_test, y_train, y_test = split_data(df, target_column="label")
 
 print("Training shape:", X_train.shape)
 print("Testing shape:", X_test.shape)
+
+# ---------------------------------------
+# Min-Max Scaling
+# ---------------------------------------
+
+scaler = MinMaxScaler()
+
+X_train = scaler.fit_transform(X_train)   # fit only on training
+X_test = scaler.transform(X_test)         # transform test
+
+print("MinMax Scaling Applied.")
 
 # ---------------------------------------
 # Model Definition (Random Forest)
@@ -167,5 +179,6 @@ MODEL_PATH = BASE_DIR / "models"
 MODEL_PATH.mkdir(parents=True, exist_ok=True)
 
 joblib.dump(best_model, MODEL_PATH / "pdf_structure_analyze_model.pkl")
+joblib.dump(scaler, MODEL_PATH / "minmax_scaler.pkl")
 
-print("\nModel saved successfully.")
+print("\nModel and scaler saved successfully.")

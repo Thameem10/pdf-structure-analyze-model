@@ -24,6 +24,8 @@
 
 /data/raw
 
+/data/predictions
+
 # Models
 
 /models

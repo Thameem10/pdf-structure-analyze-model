@@ -1,33 +1,88 @@
 import joblib
-import numpy as np
 import pandas as pd
+import json
 from pathlib import Path
 
+# ---------------------------------------
+# Paths
+# ---------------------------------------
+
 BASE_DIR = Path(__file__).resolve().parent.parent
-MODEL_PATH = BASE_DIR / "models"
+MODEL_DIR = BASE_DIR / "models"
+INPUT_JSON_PATH = BASE_DIR / "data" / "testing" / "demo_testing.json"
 
-# 1. Load BOTH the model and the scaler
-model = joblib.load(MODEL_PATH / "pdf_structure_analyze_model.pkl")
+OUTPUT_DIR = BASE_DIR / "data" / "predictions"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-print("Model loaded successfully.")
+OUTPUT_JSON_PATH = OUTPUT_DIR / "demo_testing_with_predictions.json"
 
-# 2. Create New Sample Input
-new_sample = pd.DataFrame(
-    [[1, 1, 1, 0.14, 0.12, 0.06, 0.27, 0 , 0 , 0 , 0 ]],
-    columns=[
-        "font_size", "font_size_relative","is_bold","uppercase_ratio",
-        "text_length","y_position","block_width","image_area","table_rows",
-        "table_columns","image_aspect_ratio"
-    ]
-)
+# ---------------------------------------
+# Load Model & Scaler
+# ---------------------------------------
 
-# 3. Fix Feature Order (Just in case)
-expected_columns = model.feature_names_in_
-new_sample = new_sample[expected_columns]
+model = joblib.load(MODEL_DIR / "pdf_structure_analyze_model.pkl")
+scaler = joblib.load(MODEL_DIR / "minmax_scaler.pkl")
 
-# 4. Make Prediction & Convert
+print("Model and scaler loaded successfully.")
 
-predicted_label = model.predict(new_sample)
+# ---------------------------------------
+# Load JSON Input
+# ---------------------------------------
 
+with open(INPUT_JSON_PATH, "r") as f:
+    data = json.load(f)
 
-print(f"\nPredicted Label: ${predicted_label}")
+# Convert to list if single object
+if isinstance(data, dict):
+    data = [data]
+
+df = pd.DataFrame(data)
+
+# ---------------------------------------
+# Ensure Correct Feature Order
+# ---------------------------------------
+
+expected_columns = [
+    "font_size",
+    "font_size_relative",
+    "is_bold",
+    "uppercase_ratio",
+    "text_length",
+    "y_position",
+    "block_width",
+    "image_area",
+    "table_rows",
+    "table_columns",
+    "image_aspect_ratio"
+]
+
+df = df[expected_columns]
+
+# ---------------------------------------
+# Apply Min-Max Scaling
+# ---------------------------------------
+
+scaled_values = scaler.transform(df)
+df_scaled = pd.DataFrame(scaled_values, columns=expected_columns)
+
+# ---------------------------------------
+# Prediction
+# ---------------------------------------
+
+predictions = model.predict(df_scaled)
+
+# ---------------------------------------
+# Attach Prediction to Original JSON
+# ---------------------------------------
+
+for i in range(len(data)):
+    data[i]["predicted_label"] = predictions[i]
+
+# ---------------------------------------
+# Save Updated JSON
+# ---------------------------------------
+
+with open(OUTPUT_JSON_PATH, "w") as f:
+    json.dump(data, f, indent=4)
+
+print(f"\nPredictions saved to: {OUTPUT_JSON_PATH}")
