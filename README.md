@@ -383,7 +383,7 @@ Project Structure :
         │ │ ├── pdf_loader.py
         │ │ ├── text_extractor.py
         │ │ ├── image_extractor.py
-        │ │ └── layout_parser.py
+        │ │ └── table_extractor.py
         │ │
         │ ├── features/
         │ │ ├── feature_extractor.py
@@ -393,48 +393,41 @@ Project Structure :
         │ │ ├── classifier.py
         │ │ └── model_loader.py
         │ │
-        │ └── utils/
-        │ ├── config.py
-        │ └── helpers.py
+        │ └── main.py
+        │ ├── pipeline.py
+        │
         │
         ├── data/
         │ ├── raw/ # Original PDFs
         │ │ └── sample.pdf
         │ │
         │ ├── interim/ # Extracted JSON before labeling
-        │ │ └── extracted_pages.json
+        │ │ └── features.json
         │ │
         │ ├── labeled/ # Manually labeled data
-        │ │ ├── train.json
-        │ │ ├── val.json
-        │ │ └── test.json
+        │ │ ├── features_labeled.csv
+        │ │ ├── features_labeled.json
         │ │
         │ └── processed/ # Feature matrices
-        │ ├── X_train.pkl
-        │ ├── y_train.pkl
-        │ └── scaler.pkl
-        │
+        │ | ├── confusion_matrix.png
+        │ | ├── pdf_featured_processed_dataset.csv
+        │ |
         ├── notebooks/ # Experimentation
         │ ├── 01_exploration.ipynb
         │ ├── 02_feature_engineering.ipynb
         │ └── 03_model_training.ipynb
         │
-        ├── training/ # ML training scripts
-        │ ├── train.py
-        │ ├── evaluate.py
-        │ └── hyperparameter_tuning.py
+        ├── src/ # ML training scripts
+        │ ├── data_preprocessing.py
+        │ └── predict.py
+        | ├── train.py
+        │ └── predict.py
+        │ └── utils.py
         │
         ├── models/ # Saved trained models
         │ ├── random_forest.pkl
-        │ ├── xgboost.pkl
-        │ └── layoutlm/
+        │ └── minmax_scaler.pkl
         │
-        ├── configs/
-        │ ├── model_config.yaml
-        │ └── feature_config.yaml
-        │
-        ├── logs/
-        │ └── training.log
         │
         ├── requirements.txt
         └── README.md
@@ -454,3 +447,19 @@ Run a Project :
         cmd to run the streamlit . It help maually correct the dataset which is wrong like in ui dashboard.
 
             streamlit run streamlit.py
+
+        cmd to preprocessing the labelled data . run in src
+
+            python3 data_preprocessing.py
+
+        cmd to train the model . run in src
+
+            python3 train.py
+
+        cmd to predict the data which present in demo_testing.json
+
+            python3 predict.py
+
+        cmd to strcuture the predicted data
+
+            python3 structure_sections.py

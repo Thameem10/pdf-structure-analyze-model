@@ -1,3 +1,4 @@
+import re
 from typing import List, Dict
 from statistics import mean
 from app.features.feature_utils import is_bold
@@ -12,6 +13,51 @@ class TextExtractor:
     def __init__(self, document):
         self.document = document
 
+    
+    @staticmethod
+    def compute_text_features(text: str):
+        text = text.strip()
+        length = len(text)
+
+        if length == 0:
+            return {
+                "text_length": 0,
+                "uppercase_ratio": 0,
+                "digit_ratio": 0,
+                "punctuation_ratio": 0,
+                "ends_with_period": 0,
+                "title_case_ratio": 0,
+                "contains_colon": 0,
+                "contains_numbering": 0,
+                "word_count": 0
+            }
+
+        uppercase_ratio = sum(1 for c in text if c.isupper()) / length
+        digit_ratio = sum(1 for c in text if c.isdigit()) / length
+        punctuation_ratio = sum(1 for c in text if c in ".,;:!?") / length
+        ends_with_period = int(text.endswith("."))
+        contains_colon = int(":" in text)
+
+        words = text.split()
+        word_count = len(words)
+
+        title_case_ratio = sum(1 for w in words if w.istitle()) / word_count if word_count else 0
+
+        # FIXED REGEX
+        contains_numbering = int(bool(re.match(r"^\d+(\.|\))", text)))
+
+        return {
+            "text_length": length,
+            "uppercase_ratio": uppercase_ratio,
+            "digit_ratio": digit_ratio,
+            "punctuation_ratio": punctuation_ratio,
+            "ends_with_period": ends_with_period,
+            "title_case_ratio": title_case_ratio,
+            "contains_colon": contains_colon,
+            "contains_numbering": contains_numbering,
+            "word_count": word_count
+        }
+    
     def extract(self) -> List[Dict]:
 
         text_elements = []
@@ -58,6 +104,8 @@ class TextExtractor:
 
                     # Use first span bbox for y-position
                     x0, y0, x1, y1 = spans[0]["bbox"]
+                    
+                    text_features = TextExtractor.compute_text_features(line_text)
 
                     text_elements.append({
                         "type": "Text",
@@ -72,7 +120,10 @@ class TextExtractor:
                         # Layout
                         "y_position": y0,
                         "block_width": block_bbox[2] - block_bbox[0],
-                        "bbox": [x0, y0, x1, y1]
+                        "bbox": [x0, y0, x1, y1],
+                        
+                        # New Features
+                        **text_features
                     })
 
         return text_elements

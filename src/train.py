@@ -29,6 +29,9 @@ MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
 df = load_data("pdf_featured_processed_dataset.csv")
 
+print("\nClass Distribution:")
+print(df["label"].value_counts())
+
 X_train, X_test, y_train, y_test = split_data(df, target_column="label")
 
 print("Training shape:", X_train.shape)

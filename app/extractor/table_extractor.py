@@ -79,7 +79,16 @@ class TableExtractor:
                 "aspect_ratio": width / height if height != 0 else 0,
                 "rows": table.shape[0],
                 "columns": table.shape[1],
-                "y_position": float(y0)
+                "y_position": float(y0),
+                "text_length": 0,
+                "uppercase_ratio": 0,
+                "digit_ratio": 0,
+                "punctuation_ratio": 0,
+                "ends_with_period": 0,
+                "title_case_ratio": 0,
+                "contains_colon": 0,
+                "contains_numbering": 0,
+                "word_count": 0
             })
 
         return table_elements

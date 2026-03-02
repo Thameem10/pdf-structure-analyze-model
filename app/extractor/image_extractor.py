@@ -57,7 +57,16 @@ class ImageExtractor:
                     "height": height,
                     "area": area,
                     "aspect_ratio": width / height if height != 0 else 0,
-                    "y_position": y0  # useful for sorting layout order
+                    "y_position": y0,  # useful for sorting layout order
+                    "text_length": 0,
+                    "uppercase_ratio": 0,
+                    "digit_ratio": 0,
+                    "punctuation_ratio": 0,
+                    "ends_with_period": 0,
+                    "title_case_ratio": 0,
+                    "contains_colon": 0,
+                    "contains_numbering": 0,
+                    "word_count": 0
                 })
 
         return image_elements

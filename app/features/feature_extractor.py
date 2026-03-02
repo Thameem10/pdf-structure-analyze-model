@@ -41,7 +41,13 @@ class FeatureExtractor:
 
                 line_text = element.get("content", "")
                 max_font_size = element.get("font_size", 0)
-                bold_flag = element.get("is_bold", 0)
+                is_bold = element.get("is_bold", 0)
+                digit_ratio = element.get("digit_ratio", 0)
+                punctuation_ratio = element.get("punctuation_ratio", 0)
+                ends_with_period = element.get("ends_with_period", 0)
+                title_case_ratio = element.get("title_case_ratio", 0)
+                contains_colon = element.get("title_case_ratio", 0)
+                word_count = element.get("word_count", 0)
 
                 feature_row = {
                     "type": "Text",
@@ -50,12 +56,18 @@ class FeatureExtractor:
                     # --- Typography ---
                     "font_size": max_font_size,
                     "font_size_relative": max_font_size / avg_font_size if avg_font_size else 0,
-                    "is_bold": bold_flag,
+                    "is_bold": is_bold,
 
                     # --- Text ---
                     "uppercase_ratio": uppercase_ratio(line_text),
                     "text_length": text_length(line_text),
                     "contains_numbering": contains_numbering(line_text),
+                    "digit_ratio": digit_ratio,
+                    "punctuation_ratio": punctuation_ratio,
+                    "ends_with_period": ends_with_period,
+                    "title_case_ratio": title_case_ratio,
+                    "contains_colon": contains_colon,
+                    "word_count": word_count,
 
                     # --- Layout ---
                     "y_position": element.get("y_position", 0),
@@ -90,6 +102,12 @@ class FeatureExtractor:
                     "uppercase_ratio": 0,
                     "text_length": 0,
                     "contains_numbering": 0,
+                    "digit_ratio": 0,
+                    "punctuation_ratio": 0,
+                    "ends_with_period": 0,
+                    "title_case_ratio": 0,
+                    "contains_colon": 0,
+                    "word_count": 0,
 
                     # --- Layout ---
                     "y_position": element.get("y_position", 0),
@@ -127,6 +145,12 @@ class FeatureExtractor:
                     "uppercase_ratio": 0,
                     "text_length": 0,
                     "contains_numbering": 0,
+                    "digit_ratio": 0,
+                    "punctuation_ratio": 0,
+                    "ends_with_period": 0,
+                    "title_case_ratio": 0,
+                    "contains_colon": 0,
+                    "word_count": 0,
 
                     # --- Layout ---
                     "y_position": element.get("y_position", 0),

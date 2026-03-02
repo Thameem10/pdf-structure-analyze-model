@@ -2,28 +2,44 @@ import json
 
 
 def auto_label_rows(data):
-
-    for row in data:
+    for i, row in enumerate(data):
 
         if row["type"] == "Image":
             row["label"] = "Image"
+            continue
 
-        elif row["type"] == "Table":
+        if row["type"] == "Table":
             row["label"] = "Table"
+            continue
 
-        elif row["type"] == "Text":
+        if row["type"] != "Text":
+            continue
 
-            if row["font_size_relative"] > 1.4 and row["is_bold"]:
-                row["label"] = "Heading"
+        # Heading
+        if row["font_size_relative"] > 1.5 or row["is_bold"]:
+            row["label"] = "Heading"
 
-            elif row["font_size_relative"] > 1.1 and row["is_bold"]:
-                row["label"] = "Subheading"
+        # Subheading
+        elif (
+            row["is_bold"]
+            and row["word_count"] <= 10
+        ):
+            row["label"] = "Subheading"
 
-            elif row["text_length"] < 40 and row["y_position"] > 750:
-                row["label"] = "Footer"
+        # Footer
+        elif row["text_length"] < 40 and row["y_position"] > 750:
+            row["label"] = "Footer"
 
-            else:
-                row["label"] = "Paragraph"
+        # Paragraph
+        elif (
+            row["word_count"] > 15
+            or row["ends_with_period"] == 1
+            or row["punctuation_ratio"] > 0.0001
+        ):
+            row["label"] = "Paragraph"
+
+        else:
+            row["label"] = "Paragraph"
 
     return data
 
