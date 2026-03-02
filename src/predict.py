@@ -56,13 +56,18 @@ expected_columns = [
     "image_aspect_ratio"
 ]
 
-df = df[expected_columns]
+for col in expected_columns:
+    if col not in df.columns:
+        df[col] = 0
+
+# Select only model-required columns (but keep original df untouched)
+df_features = df[expected_columns]
 
 # ---------------------------------------
 # Apply Min-Max Scaling
 # ---------------------------------------
 
-scaled_values = scaler.transform(df)
+scaled_values = scaler.transform(df_features)
 df_scaled = pd.DataFrame(scaled_values, columns=expected_columns)
 
 # ---------------------------------------
