@@ -448,6 +448,10 @@ Run a Project :
 
             streamlit run streamlit.py
 
+        cmd to remove the footer from the labelled dataset.
+
+            python3 remove_footer.py
+
         cmd to preprocessing the labelled data . run in src
 
             python3 data_preprocessing.py

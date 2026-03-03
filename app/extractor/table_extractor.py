@@ -1,5 +1,6 @@
 import camelot
 import os
+import csv
 
 class TableExtractor:
     """
@@ -57,8 +58,13 @@ class TableExtractor:
             # Save valid table
             table_filename = f"table_{idx+1}.csv"
             table_path = os.path.join(self.output_folder, table_filename)
-            table.df.to_csv(table_path, index=False)
-
+            table.df.to_csv(
+                    table_path,
+                    index=False,
+                    encoding="utf-8",
+                    quoting=csv.QUOTE_ALL,
+                    escapechar="\\"
+            )
             x0, y0, x1, y1 = table._bbox
 
             width = x1 - x0

@@ -42,25 +42,9 @@ df = pd.DataFrame(data)
 # Ensure Correct Feature Order
 # ---------------------------------------
 
-expected_columns = [
-    "font_size",
-    "font_size_relative",
-    "is_bold",
-    "uppercase_ratio",
-    "text_length",
-    "digit_ratio",
-    "punctuation_ratio",
-    "ends_with_period",
-    "title_case_ratio",
-    "contains_colon",
-    "word_count",
-    "y_position",
-    "block_width",
-    "image_area",
-    "table_rows",
-    "table_columns",
-    "image_aspect_ratio",
-]
+
+
+expected_columns = list(scaler.feature_names_in_)
 
 for col in expected_columns:
     if col not in df.columns:
