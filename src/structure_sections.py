@@ -27,12 +27,11 @@ with open(INPUT_JSON_PATH, "r") as f:
 SECTION_ORDER = ["Heading", "Subheading", "Paragraph", "Table", "Image"]
 
 # ---------------------------------------
-# Build Sections (With Merge Logic)
+# Build Sections (Improved Merge Logic)
 # ---------------------------------------
 
 sections = []
 current_section = None
-
 previous_label = None
 
 for block in data:
@@ -47,7 +46,7 @@ for block in data:
     # -------------------------
     if label in ["Heading", "Subheading"]:
 
-        # If same as previous and section exists → merge
+        # Merge consecutive headings
         if current_section and label == previous_label:
             if label == "Heading":
                 current_section["heading"] += " " + content
@@ -56,7 +55,6 @@ for block in data:
                     current_section["subheading"] += " " + content
                 else:
                     current_section["subheading"] = content
-
         else:
             if current_section:
                 sections.append(current_section)
@@ -88,11 +86,12 @@ for block in data:
             else:
                 current_section["tables"].append(content)
 
-        # Image ends section
+        # Merge consecutive images (DO NOT END SECTION)
         elif label == "Image":
-            current_section["images"].append(content)
-            sections.append(current_section)
-            current_section = None
+            if previous_label == "Image" and current_section["images"]:
+                current_section["images"][-1] += " " + content
+            else:
+                current_section["images"].append(content)
 
     previous_label = label
 

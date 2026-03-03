@@ -16,13 +16,14 @@ def auto_label_rows(data):
             continue
 
         # Heading
-        if row["font_size_relative"] > 1.5 or row["is_bold"]:
+        if row["font_size_relative"] > 1.5 and row["is_bold"]:
             row["label"] = "Heading"
 
         # Subheading
         elif (
             row["is_bold"]
             and row["word_count"] <= 10
+            and row["y_position"] < 750
         ):
             row["label"] = "Subheading"
 
